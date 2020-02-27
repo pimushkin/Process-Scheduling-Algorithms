@@ -2,47 +2,60 @@
 
 void roundRobin()
 {
-    wait = 0;
-    turn = 0;
     totalBurst = 0;
     totalTurnTime = 0;
-
-    printf("Enter the number of processes: ");
+    Process* process = NULL;
+    
+    printf("Enter the number of process: ");
     scanf("%d", &countOfProcesses);
 
-    burst = malloc(countOfProcesses * sizeof(int));
+    process = (Process*)malloc(countOfProcesses * sizeof(Process));
+    
     printf("Enter the burst time: ");
     for (int i = 0; i < countOfProcesses; i++)
     {
-        scanf("%d", &burst[i]);
-        totalBurst += burst[i];
+        process[i].id = i + 1;
+        scanf("%d", &process[i].burst);
+        totalBurst += process[i].burst;
     }
 
     int quantum;
     printf("Enter the time quantum: ");
     scanf("%d", &quantum);
 
-    int lowBurst = countOfProcesses; // количество раз
     printf("Process ID\tBurst time\tWait time\tTurnaround time\n");
-    while (lowBurst != 0)
+    process[0].wait = 0;
+    int turn = 0;
+    _Bool firstProcess = 0;
+    int countOfProcessesWithLowBurst = countOfProcesses;
+    while (countOfProcessesWithLowBurst != 0)
     {
         for (int i = 0; i < countOfProcesses; i++)
         {
-            if (burst[i] <= quantum && burst[i] != 0)
+            if (process[i].burst <= quantum && process[i].burst != 0)
             {
-                wait = turn;
-                turn = wait + burst[i];
+                if (firstProcess)
+                {
+                    process[i].wait = turn;
+                }
+                firstProcess = 1;
+                turn = process[i].wait + process[i].burst;
                 totalTurnTime += turn;
-                printf("%d\t\t%d\t\t%d\t\t%d\n", i+1, burst[i], wait, turn);
-                burst[i] = 0;
-                lowBurst--;
+                printf("%d\t\t%d\t\t%d\t\t%d\n", process[i].id, process[i].burst, process[i].wait, turn);
+                process[i].burst = 0;
+                countOfProcessesWithLowBurst--;
             }
-            else if (burst[i] > quantum)
+            else if (process[i].burst > quantum)
             {
-                wait = turn;
+                if (firstProcess)
+                {
+                    process[i].wait = turn;
+
+                }
+                firstProcess = 1;
                 turn += quantum;
-                printf("%d\t\t%d\t\t%d\t\t%d\n", i+1, quantum, wait, turn);
-                burst[i] -= quantum;
+                printf("%d\t\t%d\t\t%d\t\t%d\n", process[i].id, quantum, process[i].wait, turn);
+                process[i].burst -= quantum;
             }
         }
     }
@@ -53,5 +66,5 @@ void roundRobin()
     printf("Average turnaround time\t: %lf\n", avgTurnTime);
     printf("\n");
 
-    free(burst);
+    free(process);
 }

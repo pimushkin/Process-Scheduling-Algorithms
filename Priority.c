@@ -2,60 +2,51 @@
 
 void priority()
 {
-    wait = 0;
-    turn = 0;
     totalBurst = 0;
     totalTurnTime = 0;
+    Process* process = NULL;
 
     printf("Enter the number of processes: ");
     scanf("%d", &countOfProcesses);
 
-    burst = malloc(countOfProcesses * sizeof(int));
+    process = malloc(countOfProcesses * sizeof(Process));
+
     printf("Enter the burst time: ");
     for (int i = 0; i < countOfProcesses; i++)
     {
-        scanf("%d", &burst[i]);
-        totalBurst += burst[i];
+        process[i].id = i + 1;
+        scanf("%d", &process[i].burst);
+        totalBurst += process[i].burst;
     }
 
-    int priority[countOfProcesses];
+    int* priority = malloc(countOfProcesses * sizeof(int));
     printf("Enter the priority(1 to %d): ", countOfProcesses);
     for (int i = 0; i < countOfProcesses; i++)
     {
         scanf("%d", &priority[i]);
     }
 
-    int minimum = priority[0];
-    for (int j = 1; j < countOfProcesses; j++)
+    for (int i = 1; i < countOfProcesses; ++i)
     {
-        if (minimum > priority[j])
+        for (int j = i; j > 0 && priority[j] < priority[j - 1]; --j)
         {
-            minimum = priority[j];
+            Process temp = process[j];
+            process[j] = process[j - 1];
+            process[j - 1] = temp;
         }
     }
 
-    int maximum = priority[0];
-    for (int j = 1; j < countOfProcesses; j++)
+    printf("Process ID\tBurst time\tWait time\tTurnaround time\n");
+    process[0].wait = 0;
+    for (int i = 0; i < countOfProcesses; i++)
     {
-        if (maximum < priority[j])
+        if (i != 0)
         {
-            maximum = priority[j];
+            process[i].wait = process[i - 1].turn;
         }
-    }
-
-    printf("Process ID\t\tBurst time\t\tWait time\t\tTurnaround time\n");
-    for (int n = minimum; n <= maximum; n++)
-    {
-        for (int i = 0; i < countOfProcesses; i++)
-        {
-            if (priority[i] == n)
-            {
-                wait = turn;
-                turn = wait + burst[i];
-                totalTurnTime += turn;
-                printf("%d\t\t%d\t\t%d\t\t%d\n", i+1, burst[i], wait, turn);
-            }
-        }
+        process[i].turn = process[i].wait + process[i].burst;
+        totalTurnTime += process[i].turn;
+        printf("%d\t\t%d\t\t%d\t\t%d\n", process[i].id, process[i].burst, process[i].wait, process[i].turn);
     }
 
     double avgWaitTime = (totalTurnTime - totalBurst) / (double)countOfProcesses;
@@ -64,5 +55,6 @@ void priority()
     printf("Average turnaround time\t: %lf\n", avgTurnTime);
     printf("\n");
 
-    free(burst);
+    free(process);
+    free(priority);
 }

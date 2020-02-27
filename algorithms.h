@@ -6,5 +6,9 @@ void FCFS();
 void SJF();
 void priority();
 void roundRobin();
-int wait, turn, countOfProcesses, totalBurst, totalTurnTime, *burst;
+typedef struct Process
+{
+    int id, burst, wait, turn;
+} Process;
+int countOfProcesses, totalBurst, totalTurnTime;
 #endif //SCHEDULING_ALGORITHMS_H
